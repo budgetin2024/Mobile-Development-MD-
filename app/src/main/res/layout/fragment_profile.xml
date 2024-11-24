@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.ProfileFragment">
+
+    <!-- ImageView di pojok kanan atas -->
+    <ImageView
+        android:id="@+id/imageOnboarding1"
+        android:layout_width="310dp"
+        android:layout_height="366dp"
+        android:layout_gravity="top|end"
+        android:src="@drawable/pojok"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="0dp" />
+
+    <!-- TextView untuk judul Profile -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Profile"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginTop="80dp"
+        android:layout_marginStart="20dp" />
+
+    <ImageView
+        im
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/enma"
+
+        />
+</FrameLayout>

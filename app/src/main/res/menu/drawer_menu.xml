@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_payment"
+        android:icon="@drawable/baseline_wallet_24"
+        android:title="Payment" />
+
+    <item
+        android:id="@+id/menu_statistics"
+        android:icon="@drawable/baseline_insert_chart_outlined_24"
+        android:title="Statistics" />
+
+    <item
+        android:id="@+id/menu_invest"
+        android:icon="@drawable/baseline_monetization_on_24"
+        android:title="Invest" />
+
+    <item
+        android:id="@+id/menu_news"
+        android:icon="@drawable/baseline_newspaper_24"
+        android:title="News" />
+
+    <item
+        android:id="@+id/menu_account"
+        android:icon="@drawable/baseline_account_circle_24"
+        android:title="Account" />
+
+</menu>
