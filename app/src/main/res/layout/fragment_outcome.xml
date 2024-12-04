@@ -11,7 +11,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="@drawable/appbar_background">
+        android:background="@drawable/appbarkiw">
 
         <!-- Toolbar with back icon and title -->
         <LinearLayout
@@ -31,12 +31,11 @@
                 android:contentDescription="Back Icon"
                 android:clickable="true"
                 android:focusable="true"/>
-
             <!-- Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Income"
+                android:text="Outcome"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"
                 android:layout_marginStart="16dp"
@@ -54,7 +53,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Income Amount"
+                android:text="Outcome Amount"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:layout_marginBottom="8dp" />

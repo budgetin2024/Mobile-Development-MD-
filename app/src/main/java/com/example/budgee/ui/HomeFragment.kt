@@ -116,7 +116,7 @@ class HomeFragment : Fragment() {
     private fun navigateToOutcome() {
         // Aksi saat cardOutcome diklik, misalnya berpindah ke OutcomeFragment
         val transaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, LoginFragment())
+        transaction.replace(R.id.fragment_container, OutcomeFragment())
         transaction.addToBackStack(null)
         transaction.commit()
     }
