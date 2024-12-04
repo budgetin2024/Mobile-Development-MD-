@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.budgee.R
 import java.text.SimpleDateFormat
@@ -102,6 +103,17 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
             true // Use 24-hour format
         )
         timePickerDialog.show()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<ImageView>(R.id.btnSave).setOnClickListener {
+            // Tambahkan logika untuk menyimpan data income
+            Toast.makeText(context, "Outcome saved", Toast.LENGTH_SHORT).show()
+            // Kembali ke fragment sebelumnya
+            parentFragmentManager.popBackStack()
+        }
     }
 
     // Update category when selected from CategoryBottomSheet
