@@ -39,8 +39,8 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_salary" <!-- Replace with your icon -->
-            android:tint="#757575" />
+                android:src="@drawable/baseline_monetization_on_24"
+                android:tint="#757575" />
 
             <!-- Category Name -->
             <TextView
