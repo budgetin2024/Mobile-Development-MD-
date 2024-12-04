@@ -5,78 +5,119 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgee.R
-import com.example.budgee.adapter.TransactionAdapter
-import com.example.budgee.adapter.WalletAdapter
-import com.example.budgee.model.Transaction
-import com.example.budgee.model.Wallet
-import com.google.android.material.navigation.NavigationView
+import com.example.budgee.adapter.GoalsAdapter
+import com.example.budgee.model.GoalItem
+import androidx.cardview.widget.CardView
 
 class HomeFragment : Fragment() {
 
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
+    private lateinit var goalsRecyclerView: RecyclerView
+    private lateinit var goalsAdapter: GoalsAdapter
+    private lateinit var profileIcon: ImageView
+    private lateinit var notificationIcon: ImageView
+
+    // CardViews
+    private lateinit var cardGoals: CardView
+    private lateinit var cardStatistics: CardView
+    private lateinit var cardIncome: CardView
+    private lateinit var cardOutcome: CardView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        // Initialize RecyclerView
+        goalsRecyclerView = view.findViewById(R.id.goalsRecyclerView)
+        goalsRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        // Inisialisasi DrawerLayout dan NavigationView
-        drawerLayout = view.findViewById(R.id.drawerLayout)
-        navigationView = view.findViewById(R.id.navigationView)
+        // Initialize Profile and Notification Icons
+        profileIcon = view.findViewById(R.id.profileIcon)
+        notificationIcon = view.findViewById(R.id.notificationIcon)
 
-        // Inisialisasi menu icon
-        val menuIcon: ImageView = view.findViewById(R.id.menuIcon)
-        menuIcon.setOnClickListener {
-            drawerLayout.openDrawer(navigationView)
+        // Initialize CardViews
+        cardGoals = view.findViewById(R.id.cardViewGoals)
+        cardStatistics = view.findViewById(R.id.cardViewStatistic)
+        cardIncome = view.findViewById(R.id.cardViewIncome)
+        cardOutcome = view.findViewById(R.id.cardViewOutcome)
+
+        // Set click listeners for CardViews
+        cardGoals.setOnClickListener {
+            navigateToGoalsDetail()
         }
 
-        // Tangani klik item di Navigation Drawer
-        navigationView.setNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.menu_payment -> Toast.makeText(requireContext(), "Payment clicked", Toast.LENGTH_SHORT).show()
-                R.id.menu_statistics -> Toast.makeText(requireContext(), "Statistics clicked", Toast.LENGTH_SHORT).show()
-                R.id.menu_invest -> Toast.makeText(requireContext(), "Invest clicked", Toast.LENGTH_SHORT).show()
-                R.id.menu_news -> Toast.makeText(requireContext(), "News clicked", Toast.LENGTH_SHORT).show()
-                R.id.menu_account -> Toast.makeText(requireContext(), "Account clicked", Toast.LENGTH_SHORT).show()
-            }
-            drawerLayout.closeDrawer(navigationView)
-            true
+        cardStatistics.setOnClickListener {
+            // Aksi untuk CardView Statistik
+            navigateToStatistics()
         }
 
-        // Inisialisasi RecyclerView untuk Wallet
-        val walletsRecyclerView: RecyclerView = view.findViewById(R.id.walletsRecyclerView)
-        val walletList = listOf(
-            Wallet("Rp. 470.000.000", "**** 3456", R.drawable.ic_wallet_blue),
-            Wallet("Rp. 50.000.000", "PAYO", R.drawable.ic_wallet_green)
-        )
-        val walletAdapter = WalletAdapter(walletList)
-        walletsRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        walletsRecyclerView.adapter = walletAdapter
+        cardIncome.setOnClickListener {
+            // Aksi untuk CardView Income
+            navigateToIncome()
+        }
 
-        // Inisialisasi RecyclerView untuk Transactions
-        val transactionsRecyclerView: RecyclerView = view.findViewById(R.id.transactionsRecyclerView)
-        val transactionList = listOf(
-            Transaction("Travel", "04-11-2024", "-Rp. 6.000.000", R.drawable.pesawat),
-            Transaction("Food", "04-11-2024", "-Rp. 150.000", R.drawable.food),
-            Transaction("Shopping", "03-11-2024", "-Rp. 1.300.000", R.drawable.shoping),
-            Transaction("Shopping", "03-11-2024", "-Rp. 2.100.000", R.drawable.shoping)
+        cardOutcome.setOnClickListener {
+            // Aksi untuk CardView Outcome
+            navigateToOutcome()
+        }
+
+        // Initialize Goals Data
+        val goals = listOf(
+            GoalItem(
+                description = "Target Pencapaian 1",
+                targetValue = "Rp. 1.000.000.000",
+                progress = 50,
+                budgetDetail = "Rp. 6.600.000 (15 days left)"
+            ),
+            GoalItem(
+                description = "Target Pencapaian 2",
+                targetValue = "Rp. 500.000.000",
+                progress = 75,
+                budgetDetail = "Rp. 3.300.000 (10 days left)"
+            )
         )
-        val transactionAdapter = TransactionAdapter(transactionList)
-        transactionsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        transactionsRecyclerView.adapter = transactionAdapter
+
+        // Set up Adapter
+        goalsAdapter = GoalsAdapter(goals)
+        goalsRecyclerView.adapter = goalsAdapter
+
+        return view
     }
 
+    private fun navigateToGoalsDetail() {
+        // Aksi saat cardGoals diklik, misalnya berpindah ke GoalsDetailFragment
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, LoginFragment()) // Ganti ID fragment_container sesuai ID container yang ada
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun navigateToStatistics() {
+        // Aksi saat cardStatistics diklik, misalnya berpindah ke StatisticsFragment
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, StatisticsFragment())
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun navigateToIncome() {
+        // Aksi saat cardIncome diklik, misalnya berpindah ke IncomeFragment
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, IncomeFragment())
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun navigateToOutcome() {
+        // Aksi saat cardOutcome diklik, misalnya berpindah ke OutcomeFragment
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, LoginFragment())
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
 }

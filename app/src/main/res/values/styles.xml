@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BottomNavShape">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Material3.Corner.None</item>
+    </style>
+
+    <style name="CustomPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <!-- Set background color for the PopupMenu -->
+        <item name="android:popupBackground">@drawable/custom_popup_background</item>
+
+        <!-- Set text color and style for menu items -->
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+
+    </style>
+</resources>

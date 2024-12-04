@@ -19,8 +19,8 @@ class TransactionAdapter(private val transactionList: List<Transaction>) :
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactionList[position]
-        holder.transactionIcon.setImageResource(transaction.icon)
-        holder.transactionCategory.text = transaction.category
+        holder.transactionIcon.setImageResource(transaction.imageRes)
+        holder.transactionCategory.text = transaction.title
         holder.transactionDate.text = transaction.date
         holder.transactionAmount.text = transaction.amount
     }

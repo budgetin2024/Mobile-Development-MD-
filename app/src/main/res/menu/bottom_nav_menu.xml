@@ -1,24 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Home -->
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/baseline_wallet_24"
         android:title="Home" />
 
+    <!-- Stats -->
     <item
         android:id="@+id/nav_stats"
         android:icon="@drawable/baseline_insert_chart_outlined_24"
         android:title="Stats" />
 
+    <!-- Add -->
     <item
-        android:id="@+id/nav_wallet"
-        android:icon="@drawable/baseline_monetization_on_24"
-        android:title="Wallet" />
+        android:id="@+id/nav_add"
+        android:icon="@drawable/baseline_add_circle_24"
+        android:title=""
+        app:showAsAction="always"
+       />
 
+    <!-- News -->
+    <item
+        android:id="@+id/nav_news"
+        android:icon="@drawable/baseline_newspaper_24"
+        android:title="News" />
+
+    <!-- Profile -->
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/baseline_account_circle_24"
         android:title="Profile" />
-
 </menu>

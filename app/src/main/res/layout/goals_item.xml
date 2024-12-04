@@ -1,0 +1,61 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="200dp"
+    android:layout_height="120dp"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="@color/white">
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Target Pencapaian"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Target Value -->
+        <TextView
+            android:id="@+id/targetValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/description"
+            android:layout_marginTop="4dp"
+            android:text="Rp. 1.000.000.000"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/budgetProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_below="@id/targetValue"
+            android:layout_marginTop="8dp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:progress="50"
+            android:progressTint="@color/blue" />
+
+        <!-- Budget Detail -->
+        <TextView
+            android:id="@+id/budgetDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/budgetProgressBar"
+            android:layout_marginTop="8dp"
+            android:text="Rp. 6.600.000 (15 days left)"
+            android:textSize="12sp"
+            android:textColor="#666666" />
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

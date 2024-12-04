@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/popup_item_layout.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- Circle Icon -->
+    <FrameLayout
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/item_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/baseline_add_circle_24"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_background" />
+    </FrameLayout>
+
+    <!-- Title Below the Icon -->
+    <TextView
+        android:id="@+id/item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"/>
+</LinearLayout>
