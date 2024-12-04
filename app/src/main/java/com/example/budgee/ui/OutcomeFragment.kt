@@ -14,7 +14,7 @@ import com.example.budgee.R
 import java.text.SimpleDateFormat
 import java.util.*
 
-class IncomeFragment : Fragment(), Category.CategorySelectionListener {
+class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
 
     private lateinit var amountEditText: EditText
     private lateinit var dateTextView: TextView
@@ -27,7 +27,7 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_income, container, false)
+        val view = inflater.inflate(R.layout.fragment_outcome, container, false)
 
         // Initialize Views
         amountEditText = view.findViewById(R.id.amountEditText)
@@ -37,7 +37,7 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
         timeTextView = view.findViewById(R.id.timeTextView)
         backIcon = view.findViewById(R.id.backIcon)
 
-        // Handle back icon click
+
         backIcon.setOnClickListener {
             requireActivity().onBackPressed()  // Go back to the previous fragment/activity
         }
@@ -72,7 +72,7 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
         // Handle category click to show CategoryBottomSheet
         categoryTextView.setOnClickListener {
             val categoryBottomSheet = Category()
-            categoryBottomSheet.setCategorySelectionListener(this, showFoodTravelingShopMedicalInvestmentTransportationAnother = false)
+            categoryBottomSheet.setCategorySelectionListener(this, showGajiBonus = false) // Hide "Gaji" and "Bonus"
             categoryBottomSheet.show(parentFragmentManager, categoryBottomSheet.tag)
         }
 
