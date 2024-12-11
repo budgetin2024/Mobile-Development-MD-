@@ -1,7 +1,7 @@
 package com.example.budgee.ui
 
 import android.app.DatePickerDialog
-import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,24 +13,33 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.budgee.MainActivity
 import com.example.budgee.R
+import com.example.budgee.api.TransactionsApi
+import com.example.budgee.json.TransactionRequest
 import com.google.android.material.button.MaterialButton
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
 class IncomeFragment : Fragment(), Category.CategorySelectionListener {
 
     private lateinit var amountEditText: EditText
-    private lateinit var dateTextView: TextView
     private lateinit var dateValueTextView: TextView
     private lateinit var categoryTextView: TextView
-    private lateinit var timeTextView: TextView
     private lateinit var backIcon: ImageView
+    private lateinit var remarksEditText: EditText
+
+    private lateinit var transactionsApi: TransactionsApi
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_income, container, false)
 
         // Hide Bottom Navigation when IncomeFragment is active
@@ -42,24 +51,53 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Retrieve token from SharedPreferences
+        val sharedPrefs = activity?.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val token = sharedPrefs?.getString("auth_token", null)
+
+        if (token.isNullOrEmpty()) {
+            Toast.makeText(context, "Token not found. Please login again.", Toast.LENGTH_SHORT).show()
+            replaceFragment(LoginFragment())
+            return
+        }
+
+        // Set up Retrofit with Authorization Token
+        val logging = HttpLoggingInterceptor()
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+                chain.proceed(request)
+            }
+            .addInterceptor(logging)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://backend-budgetin.et.r.appspot.com")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+
+        transactionsApi = retrofit.create(TransactionsApi::class.java)
+
         // Initialize Views
         amountEditText = view.findViewById(R.id.amountEditText)
-        dateTextView = view.findViewById(R.id.dateTextView)
         dateValueTextView = view.findViewById(R.id.dateValueTextView)
         categoryTextView = view.findViewById(R.id.categoryTextView)
-        timeTextView = view.findViewById(R.id.timeTextView)
+        remarksEditText = view.findViewById(R.id.remarksEditText)
         backIcon = view.findViewById(R.id.backIcon)
 
         // Handle back icon click
         backIcon.setOnClickListener {
-            // Navigate directly to the HomeFragment
             replaceFragment(HomeFragment())
         }
 
-
         // Set current date as default
         val calendar = Calendar.getInstance()
-        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.time)
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
         dateValueTextView.text = currentDate
 
         // Handle date click to show DatePickerDialog
@@ -69,7 +107,7 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
                 { _, year, monthOfYear, dayOfMonth ->
                     val selectedDate = Calendar.getInstance()
                     selectedDate.set(year, monthOfYear, dayOfMonth)
-                    val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(selectedDate.time)
+                    val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time)
                     dateValueTextView.text = formattedDate
                 },
                 calendar.get(Calendar.YEAR),
@@ -86,61 +124,56 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
             categoryBottomSheet.show(parentFragmentManager, categoryBottomSheet.tag)
         }
 
-        // Handle time click to show TimePickerDialog
-        timeTextView.setOnClickListener {
-            showTimePicker()
-        }
-
         // Handle save button click
         view.findViewById<MaterialButton>(R.id.btnSave).setOnClickListener {
             val amountText = amountEditText.text.toString().trim()
-            if (amountText.isEmpty()) {
-                Toast.makeText(context, "Please enter an income amount", Toast.LENGTH_SHORT).show()
+            val category = categoryTextView.text.toString().trim()
+            val date = dateValueTextView.text.toString().trim()
+            val description = remarksEditText.text.toString().trim()
+
+            if (amountText.isEmpty() || category.isEmpty() || date.isEmpty()) {
+                Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             } else {
-                // Add logic to save the income data
-                Toast.makeText(context, "Income saved successfully", Toast.LENGTH_SHORT).show()
-                // Go back to the previous fragment
-                parentFragmentManager.popBackStack()
+                val transaction = TransactionRequest(
+                    amount = amountText.toDouble(),
+                    category = category,
+                    date = date,
+                    type = "income",
+                    description = description
+                )
+                saveTransaction(transaction)
             }
         }
     }
 
-    // Helper function to replace fragments
-    private fun replaceFragment(fragment: androidx.fragment.app.Fragment) {
-        // Replace the current fragment with the specified fragment (HomeFragment in this case)
+    private fun saveTransaction(transaction: TransactionRequest) {
+        transactionsApi.addTransaction(transaction).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(context, "Income saved successfully", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                } else {
+                    Toast.makeText(context, "Failed to save income", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)  // Replace with your fragment container ID
-            .addToBackStack(null)  // Optional: Add this fragment to the back stack if you want to allow back navigation
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
             .commit()
     }
 
-
-    // Show TimePickerDialog when Time TextView is clicked
-    private fun showTimePicker() {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-
-        val timePickerDialog = TimePickerDialog(
-            requireContext(),
-            { _, selectedHour, selectedMinute ->
-                // Update the Time TextView with the selected time
-                val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
-                timeTextView.text = formattedTime
-            },
-            hour,
-            minute,
-            true // Use 24-hour format
-        )
-        timePickerDialog.show()
-    }
-
-    // Update category when selected from CategoryBottomSheet
     override fun onCategorySelected(category: String) {
         categoryTextView.text = category
     }
 
-    // Show Bottom Navigation when leaving the fragment
     override fun onDestroyView() {
         super.onDestroyView()
         (activity as? MainActivity)?.showBottomNavigation()
