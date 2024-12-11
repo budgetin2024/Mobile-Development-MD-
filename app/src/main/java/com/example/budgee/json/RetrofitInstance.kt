@@ -10,6 +10,8 @@ object RetrofitInstance {
     // BASE URL untuk News API
     private const val NEWS_API_BASE_URL = "https://backend-budgetin.et.r.appspot.com/"
 
+    private const val GOALS_API_BASE_URL = "https://backend-budgetin.et.r.appspot.com/"
+
     // Retrofit instance untuk Authentication API
     val authRetrofit: Retrofit by lazy {
         Retrofit.Builder()
@@ -25,4 +27,9 @@ object RetrofitInstance {
             .build()
             .create(NewsApi::class.java)
     }
+
+    val goalsRetrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(GOALS_API_BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 }
