@@ -48,8 +48,8 @@
                     android:id="@+id/user"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=" Jamal"
-                    android:textColor="@color/white"
+                    android:text="Jamal"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold"
                     android:textSize="15sp" />
 

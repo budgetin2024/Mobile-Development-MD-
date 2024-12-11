@@ -2,13 +2,12 @@ package com.example.budgee.json
 
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.Header
 
 interface NewsApi {
-    @GET("top-headlines")
-    fun getTopHeadlines(
-        @Query("country") country: String = "id",  // Default ke Indonesia
-        @Query("category") category: String = "business", // Default ke kategori bisnis
-        @Query("apiKey") apiKey: String = "d785abb609e845ffa5828f81a90faf18" // API Key Anda
+
+    @GET("news") // Pastikan path ini sesuai dengan server Anda
+    fun getNews(
+        @Header("Authorization") authHeader: String // Menambahkan header Authorization
     ): Call<NewsResponse>
 }

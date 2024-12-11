@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             showBottomNavigation()
         } else {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment()) // Show LoginFragment if not logged in
+                .replace(R.id.fragment_container, LoginFragment()) // Show LoginFragment if not logged in
                 .commit()
             hideBottomNavigation()
         }
@@ -68,12 +68,12 @@ class MainActivity : AppCompatActivity() {
 
             when (menuItem.itemId) {
                 R.id.nav_home -> {
-                    replaceFragmentInActivity(HomeFragment()) // Use the correct function
+                    replaceFragmentInActivity(HomeFragment())
                     showBottomNavigation()
                     true
                 }
                 R.id.nav_stats -> {
-                    replaceFragmentInActivity(StatisticsFragment()) // Use the correct function
+                    replaceFragmentInActivity(StatisticsFragment())
                     showBottomNavigation()
                     true
                 }
@@ -82,12 +82,12 @@ class MainActivity : AppCompatActivity() {
                     false
                 }
                 R.id.nav_news -> {
-                    replaceFragmentInActivity(NewsFragment()) // Use the correct function
+                    replaceFragmentInActivity(NewsFragment())
                     showBottomNavigation()
                     true
                 }
                 R.id.nav_profile -> {
-                    replaceFragmentInActivity(ProfileFragment()) // Use the correct function
+                    replaceFragmentInActivity(ProfileFragment())
                     showBottomNavigation()
                     true
                 }
@@ -97,11 +97,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Function to replace fragment that can be accessed from other fragments
-    fun replaceFragmentInActivity(fragment: Fragment) {
+    fun replaceFragmentInActivity(fragment: Fragment, addToBackStack: Boolean = true) {
         Log.d("MainActivity", "Replacing fragment with: ${fragment.javaClass.simpleName}")
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, fragment)
-        transaction.addToBackStack(null)
+        if (addToBackStack) {
+            transaction.addToBackStack(null)
+        }
         transaction.commit()
     }
 
@@ -134,15 +136,15 @@ class MainActivity : AppCompatActivity() {
         val btnExpense = view.findViewById<ImageView>(R.id.btn_expense)
 
         btnIncome.setOnClickListener {
-            replaceFragmentInActivity(IncomeFragment()) // Use the correct function
+            replaceFragmentInActivity(IncomeFragment())
             dialog.dismiss()
         }
         btnTransfer.setOnClickListener {
-            replaceFragmentInActivity(GoalsFragment()) // Use the correct function
+            replaceFragmentInActivity(GoalsFragment())
             dialog.dismiss()
         }
         btnExpense.setOnClickListener {
-            replaceFragmentInActivity(OutcomeFragment()) // Use the correct function
+            replaceFragmentInActivity(OutcomeFragment())
             dialog.dismiss()
         }
 

@@ -50,7 +50,8 @@ class LoginFragment : Fragment() {
 
             // Validasi input
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill in both fields", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please fill in both fields", Toast.LENGTH_SHORT)
+                    .show()
             } else {
                 // Memanggil API untuk login
                 loginUser(email, password)
@@ -61,30 +62,57 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginUser(email: String, password: String) {
-        val authApiService = RetrofitInstance.authRetrofit.create(com.example.budgee.json.AuthApiService::class.java)
+        val authApiService =
+            RetrofitInstance.authRetrofit.create(com.example.budgee.json.AuthApiService::class.java)
         val loginRequest = LoginRequest(email, password)
 
         authApiService.loginUser(loginRequest).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 Log.d("LoginFragment", "Response: ${response.body()}")
+
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
-                    Log.d("LoginFragment", "Login success: ${loginResponse?.success}, Message: ${loginResponse?.message}")
-                    if (loginResponse?.success == true) {
-                        // Simpan status login di SharedPreferences
-                        val sharedPrefs = activity?.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                        sharedPrefs?.edit()?.putBoolean("is_logged_in", true)?.apply()
+                    Log.d(
+                        "LoginFragment",
+                        "Login success: ${loginResponse?.success}, Message: ${loginResponse?.message}"
+                    )
 
-                        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                    // Check for successful login using message or other flags
+                    if (loginResponse?.message?.contains("successful") == true) {
+                        // Assuming the token is present and the message indicates success
+                        val token = loginResponse.token
+                        if (!token.isNullOrEmpty()) {
+                            // Save token to SharedPreferences
+                            val sharedPrefs =
+                                activity?.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                            sharedPrefs?.edit()?.putBoolean("is_logged_in", true)?.apply()
+                            sharedPrefs?.edit()?.putString("auth_token", token)?.apply()
 
-                        // Menggunakan Intent untuk berpindah ke MainActivity
-                        val intent = Intent(activity, MainActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Clear stack
-                        startActivity(intent)
+                            Toast.makeText(
+                                requireContext(),
+                                "Login successful!",
+                                Toast.LENGTH_SHORT
+                            ).show()
 
+                            // Proceed to MainActivity after successful login
+                            val intent = Intent(activity, MainActivity::class.java)
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Clear stack
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "Token not received. Try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     } else {
-                        // Tampilkan pesan yang sesuai jika login gagal
-                        Toast.makeText(requireContext(), loginResponse?.message ?: "Login failed", Toast.LENGTH_SHORT).show()
+                        // Handle the case when login is unsuccessful (even if the message says "Login successful.")
+                        Toast.makeText(
+                            requireContext(),
+                            loginResponse?.message ?: "Login failed",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
                     Toast.makeText(requireContext(), "Login failed", Toast.LENGTH_SHORT).show()

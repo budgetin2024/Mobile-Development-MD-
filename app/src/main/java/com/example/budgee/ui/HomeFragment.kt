@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ class HomeFragment : Fragment() {
     private lateinit var profileIcon: ImageView
     private lateinit var notificationIcon: ImageView
     private lateinit var seeAllWallets: TextView
+    private lateinit var userTextView: TextView // Inisialisasi untuk TextView username
 
     // CardViews
     private lateinit var cardGoals: CardView
@@ -49,6 +51,16 @@ class HomeFragment : Fragment() {
 
         // Initialize See All TextView
         seeAllWallets = view.findViewById(R.id.seeAllWallets)
+
+        // Initialize user TextView for displaying username
+        userTextView = view.findViewById(R.id.user)
+
+        // Ambil username yang sudah login dari SharedPreferences
+        val sharedPreferences = requireActivity().getSharedPreferences("user_prefs", AppCompatActivity.MODE_PRIVATE)
+        val username = sharedPreferences.getString("username", "User") // Ganti "Jamal" dengan default
+
+        // Set username pada TextView
+        userTextView.text = username
 
         // Set click listeners for CardViews
         cardGoals.setOnClickListener {
@@ -100,15 +112,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToGoalsDetail() {
-        // Aksi saat cardGoals diklik, misalnya berpindah ke GoalsDetailFragment
         val transaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, GoalsFragment()) // Ganti ID fragment_container sesuai ID container yang ada
+        transaction.replace(R.id.fragment_container, GoalsFragment())
         transaction.addToBackStack(null)
         transaction.commit()
     }
 
     private fun navigateToStatistics() {
-        // Aksi saat cardStatistics diklik, misalnya berpindah ke StatisticsFragment
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, StatisticsFragment())
         transaction.addToBackStack(null)
@@ -116,7 +126,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToIncome() {
-        // Aksi saat cardIncome diklik, misalnya berpindah ke IncomeFragment
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, IncomeFragment())
         transaction.addToBackStack(null)
@@ -124,7 +133,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToOutcome() {
-        // Aksi saat cardOutcome diklik, misalnya berpindah ke OutcomeFragment
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, OutcomeFragment())
         transaction.addToBackStack(null)
@@ -132,17 +140,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToGoals() {
-        // Aksi saat "See All" diklik, navigasi ke GoalsFragment
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, GoalsFragment())
         transaction.addToBackStack(null)
         transaction.commit()
     }
+
     private fun navigateToProfile() {
-        // Aksi saat profileIcon diklik, misalnya berpindah ke ProfileFragment
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, ProfileFragment())
         transaction.addToBackStack(null)
         transaction.commit()
     }
 }
+
