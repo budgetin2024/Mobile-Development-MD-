@@ -11,7 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.example.budgee.MainActivity
 import com.example.budgee.R
+import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,7 +30,11 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_outcome, container, false)
+
+        // Hide Bottom Navigation when OutcomeFragment is active
+        (activity as? MainActivity)?.hideBottomNavigation()
 
         // Initialize Views
         amountEditText = view.findViewById(R.id.amountEditText)
@@ -38,18 +44,14 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
         timeTextView = view.findViewById(R.id.timeTextView)
         backIcon = view.findViewById(R.id.backIcon)
 
-
+        // Handle back icon click
         backIcon.setOnClickListener {
-            requireActivity().onBackPressed()  // Go back to the previous fragment/activity
+            // Navigate directly to the HomeFragment
+            replaceFragment(HomeFragment())
         }
 
         // Set current date as default
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-
-        // Format the current date to display it on dateValueTextView
         val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.time)
         dateValueTextView.text = currentDate
 
@@ -57,15 +59,15 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
         dateValueTextView.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 requireContext(),
-                { _, year1, monthOfYear, dayOfMonth1 ->
+                { _, year, monthOfYear, dayOfMonth ->
                     val selectedDate = Calendar.getInstance()
-                    selectedDate.set(year1, monthOfYear, dayOfMonth1)
+                    selectedDate.set(year, monthOfYear, dayOfMonth)
                     val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(selectedDate.time)
                     dateValueTextView.text = formattedDate
                 },
-                year,
-                month,
-                dayOfMonth
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
             )
             datePickerDialog.show()
         }
@@ -85,6 +87,14 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
         return view
     }
 
+    // Helper function to replace fragments
+    private fun replaceFragment(fragment: androidx.fragment.app.Fragment) {
+        // Replace the current fragment with the specified fragment (HomeFragment in this case)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)  // Replace with your fragment container ID
+            .addToBackStack(null)  // Optional: Add this fragment to the back stack if you want to allow back navigation
+            .commit()
+    }
     // Show TimePickerDialog when Time TextView is clicked
     private fun showTimePicker() {
         val calendar = Calendar.getInstance()
@@ -108,16 +118,28 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<ImageView>(R.id.btnSave).setOnClickListener {
-            // Tambahkan logika untuk menyimpan data income
-            Toast.makeText(context, "Outcome saved", Toast.LENGTH_SHORT).show()
-            // Kembali ke fragment sebelumnya
-            parentFragmentManager.popBackStack()
+        view.findViewById<MaterialButton>(R.id.btnSave).setOnClickListener {
+            val amountText = amountEditText.text.toString().trim()
+            if (amountText.isEmpty()) {
+                Toast.makeText(context, "Please enter an amount", Toast.LENGTH_SHORT).show()
+            } else {
+                // Add logic to save the expense data
+                Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
+                // Go back to the previous fragment
+                parentFragmentManager.popBackStack()
+            }
         }
+
     }
 
     // Update category when selected from CategoryBottomSheet
     override fun onCategorySelected(category: String) {
         categoryTextView.text = category
+    }
+
+    // Show Bottom Navigation when leaving the fragment
+    override fun onDestroyView() {
+        super.onDestroyView()
+        (activity as? MainActivity)?.showBottomNavigation()
     }
 }

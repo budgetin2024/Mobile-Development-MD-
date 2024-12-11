@@ -3,21 +3,16 @@ package com.example.budgee
 import android.animation.ObjectAnimator
 import android.app.Dialog
 import android.os.Bundle
-import android.view.MenuItem
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.example.budgee.databinding.ActivityMainBinding
-import com.example.budgee.ui.HomeFragment
-import com.example.budgee.ui.NewsFragment
-import com.example.budgee.ui.ProfileFragment
-import com.example.budgee.ui.StatisticsFragment
-import com.example.budgee.welcome.OnboardingFragment
+import com.example.budgee.ui.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -33,44 +28,53 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Initial fragment load based on login status
         if (savedInstanceState == null) {
             showInitialFragment()
         }
 
+        // Setup bottom navigation
         setupBottomNavigation()
     }
 
+    // Check user login status and show the appropriate fragment
     private fun showInitialFragment() {
-        val onboardingShown = checkIfOnboardingShown()
-        if (!onboardingShown) {
+        val isLoggedIn = checkIfUserLoggedIn()
+
+        if (isLoggedIn) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, OnboardingFragment())
+                .replace(R.id.fragment_container, HomeFragment()) // Show HomeFragment if logged in
                 .commit()
+            showBottomNavigation()
         } else {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
+                .replace(R.id.fragment_container, HomeFragment()) // Show LoginFragment if not logged in
                 .commit()
+            hideBottomNavigation()
         }
     }
 
+    // Setup bottom navigation menu and its actions
     private fun setupBottomNavigation() {
         binding.bottomNavigation.background = ContextCompat.getDrawable(this, R.drawable.custom_bottom_nav_background)
 
         binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
             val menuItemView = binding.bottomNavigation.findViewById<View>(menuItem.itemId)
 
-            // Animasi untuk ikon (naik dan turun)
+            // Animation for menu item icon (up and down)
             val translateAnimator = ObjectAnimator.ofFloat(menuItemView, "translationY", 0f, -20f, 0f)
             translateAnimator.duration = 300
             translateAnimator.start()
 
             when (menuItem.itemId) {
                 R.id.nav_home -> {
-                    replaceFragment(HomeFragment())
+                    replaceFragmentInActivity(HomeFragment()) // Use the correct function
+                    showBottomNavigation()
                     true
                 }
                 R.id.nav_stats -> {
-                    replaceFragment(StatisticsFragment())
+                    replaceFragmentInActivity(StatisticsFragment()) // Use the correct function
+                    showBottomNavigation()
                     true
                 }
                 R.id.nav_add -> {
@@ -78,63 +82,76 @@ class MainActivity : AppCompatActivity() {
                     false
                 }
                 R.id.nav_news -> {
-                    replaceFragment(NewsFragment())
+                    replaceFragmentInActivity(NewsFragment()) // Use the correct function
+                    showBottomNavigation()
                     true
                 }
                 R.id.nav_profile -> {
-                    replaceFragment(ProfileFragment())
+                    replaceFragmentInActivity(ProfileFragment()) // Use the correct function
+                    showBottomNavigation()
                     true
                 }
                 else -> false
             }
         }
     }
+
+    // Function to replace fragment that can be accessed from other fragments
+    fun replaceFragmentInActivity(fragment: Fragment) {
+        Log.d("MainActivity", "Replacing fragment with: ${fragment.javaClass.simpleName}")
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    // Show the bottom navigation
+    fun showBottomNavigation() {
+        binding.bottomNavigation.visibility = View.VISIBLE
+    }
+
+    // Hide the bottom navigation
+    fun hideBottomNavigation() {
+        binding.bottomNavigation.visibility = View.GONE
+    }
+
+    // Handle custom popup for "Add" action
     private fun showCustomPopup() {
         val dialog = Dialog(this)
         val view = layoutInflater.inflate(R.layout.popup_menu, null)
 
-        // Set custom dialog layout
         dialog.setContentView(view)
-
-        // Set dialog properties to appear above the Bottom Navigation
         dialog.window?.apply {
             setBackgroundDrawableResource(android.R.color.transparent)
             val params = attributes
-            params.y = -200 // Adjust this value to position the dialog above Bottom Navigation
+            params.y = -200 // Position the dialog above Bottom Navigation
             attributes = params
         }
 
-        // Handle button clicks
+        // Handle the popup button clicks
         val btnIncome = view.findViewById<ImageView>(R.id.btn_income)
         val btnTransfer = view.findViewById<ImageView>(R.id.btn_transfer)
         val btnExpense = view.findViewById<ImageView>(R.id.btn_expense)
 
         btnIncome.setOnClickListener {
-            Toast.makeText(this, "Penerimaan clicked", Toast.LENGTH_SHORT).show()
+            replaceFragmentInActivity(IncomeFragment()) // Use the correct function
             dialog.dismiss()
         }
         btnTransfer.setOnClickListener {
-            Toast.makeText(this, "Transfer clicked", Toast.LENGTH_SHORT).show()
+            replaceFragmentInActivity(GoalsFragment()) // Use the correct function
             dialog.dismiss()
         }
         btnExpense.setOnClickListener {
-            Toast.makeText(this, "Pengeluaran clicked", Toast.LENGTH_SHORT).show()
+            replaceFragmentInActivity(OutcomeFragment()) // Use the correct function
             dialog.dismiss()
         }
 
         dialog.show()
     }
 
-
-    private fun replaceFragment(fragment: androidx.fragment.app.Fragment): Boolean {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
-        return true
-    }
-
-    private fun checkIfOnboardingShown(): Boolean {
+    // Check if the user is logged in (stored in SharedPreferences)
+    private fun checkIfUserLoggedIn(): Boolean {
         val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        return sharedPrefs.getBoolean("onboarding_shown", false)
+        return sharedPrefs.getBoolean("is_logged_in", false) // Assuming 'is_logged_in' is stored here
     }
 }

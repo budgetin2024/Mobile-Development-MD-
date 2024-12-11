@@ -5,14 +5,25 @@
     android:layout_height="match_parent"
     tools:context=".ui.LoginFragment">
 
+    <!-- ImageView untuk gambar background -->
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_gravity="bottom|center"
+        android:src="@drawable/purple"
+        android:scaleType="centerCrop" />
+
+    <!-- Image at the top (Logo or Onboarding image) -->
     <ImageView
         android:id="@+id/imageOnboarding1"
-        android:layout_width="179dp"
-        android:layout_height="171dp"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="60dp"
         android:src="@drawable/img" />
 
+    <!-- Login Form Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,7 +32,7 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Email Input -->
+        <!-- Sign In Title -->
         <TextView
             android:id="@+id/sign_in_title"
             android:layout_width="wrap_content"
@@ -37,7 +48,8 @@
             android:id="@+id/email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/underline_edit_text"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/edit_text_border"
             android:hint="Email Address"
             android:inputType="textEmailAddress"
             android:padding="12dp" />
@@ -48,7 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@drawable/underline_edit_text"
+            android:background="@drawable/edit_text_border"
             android:drawableEnd="@drawable/eye"
             android:hint="Password"
             android:inputType="textPassword"
@@ -65,32 +77,27 @@
             android:text="Forgot Password?"
             android:textColor="@color/blue" />
 
-        <FrameLayout
+        <!-- Sign Up Button -->
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="40dp"
+            android:text="Sign In"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:background="@drawable/btn_sign_up_background"
+            android:layout_gravity="center" />
+
+        <!-- Link to Register Page -->
+        <TextView
+            android:id="@+id/register_link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp">
-
-            <!-- ImageButton as Background -->
-            <ImageButton
-                android:id="@+id/btn_sign_in"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:src="@drawable/btn_login"
-                android:contentDescription="Sign In" />
-
-            <!-- Centered Text on Top of ImageButton -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Sign In"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-        </FrameLayout>
-
+            android:layout_marginTop="16dp"
+            android:text="Don't have an account? Sign Up"
+            android:textColor="@color/blue"
+            android:textSize="14sp"
+            android:layout_gravity="center" />
     </LinearLayout>
 </FrameLayout>

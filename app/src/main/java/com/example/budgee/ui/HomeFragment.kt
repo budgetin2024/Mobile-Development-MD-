@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +20,7 @@ class HomeFragment : Fragment() {
     private lateinit var goalsAdapter: GoalsAdapter
     private lateinit var profileIcon: ImageView
     private lateinit var notificationIcon: ImageView
+    private lateinit var seeAllWallets: TextView
 
     // CardViews
     private lateinit var cardGoals: CardView
@@ -38,7 +40,6 @@ class HomeFragment : Fragment() {
 
         // Initialize Profile and Notification Icons
         profileIcon = view.findViewById(R.id.profileIcon)
-        notificationIcon = view.findViewById(R.id.notificationIcon)
 
         // Initialize CardViews
         cardGoals = view.findViewById(R.id.cardViewGoals)
@@ -46,24 +47,33 @@ class HomeFragment : Fragment() {
         cardIncome = view.findViewById(R.id.cardViewIncome)
         cardOutcome = view.findViewById(R.id.cardViewOutcome)
 
+        // Initialize See All TextView
+        seeAllWallets = view.findViewById(R.id.seeAllWallets)
+
         // Set click listeners for CardViews
         cardGoals.setOnClickListener {
             navigateToGoalsDetail()
         }
 
         cardStatistics.setOnClickListener {
-            // Aksi untuk CardView Statistik
             navigateToStatistics()
         }
 
         cardIncome.setOnClickListener {
-            // Aksi untuk CardView Income
             navigateToIncome()
         }
 
         cardOutcome.setOnClickListener {
-            // Aksi untuk CardView Outcome
             navigateToOutcome()
+        }
+
+        // Set click listener for See All TextView
+        seeAllWallets.setOnClickListener {
+            navigateToGoals()
+        }
+
+        profileIcon.setOnClickListener {
+            navigateToProfile()
         }
 
         // Initialize Goals Data
@@ -92,7 +102,7 @@ class HomeFragment : Fragment() {
     private fun navigateToGoalsDetail() {
         // Aksi saat cardGoals diklik, misalnya berpindah ke GoalsDetailFragment
         val transaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, LoginFragment()) // Ganti ID fragment_container sesuai ID container yang ada
+        transaction.replace(R.id.fragment_container, GoalsFragment()) // Ganti ID fragment_container sesuai ID container yang ada
         transaction.addToBackStack(null)
         transaction.commit()
     }
@@ -117,6 +127,21 @@ class HomeFragment : Fragment() {
         // Aksi saat cardOutcome diklik, misalnya berpindah ke OutcomeFragment
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, OutcomeFragment())
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    private fun navigateToGoals() {
+        // Aksi saat "See All" diklik, navigasi ke GoalsFragment
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, GoalsFragment())
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+    private fun navigateToProfile() {
+        // Aksi saat profileIcon diklik, misalnya berpindah ke ProfileFragment
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, ProfileFragment())
         transaction.addToBackStack(null)
         transaction.commit()
     }

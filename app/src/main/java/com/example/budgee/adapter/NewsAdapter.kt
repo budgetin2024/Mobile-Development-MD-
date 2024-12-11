@@ -1,12 +1,13 @@
 package com.example.budgee.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgee.R
 import com.example.budgee.json.Article
-import android.widget.TextView
 
 class NewsAdapter(private val articles: List<Article>) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
@@ -17,14 +18,16 @@ class NewsAdapter(private val articles: List<Article>) : RecyclerView.Adapter<Ne
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val article = articles[position]
+        Log.d("NewsAdapter", "Binding article: ${article.title}")  // Log judul artikel
         holder.title.text = article.title
         holder.description.text = article.description
     }
 
+
     override fun getItemCount(): Int = articles.size
 
     class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title = itemView.findViewById<TextView>(R.id.text_title)
-        val description = itemView.findViewById<TextView>(R.id.text_description)
+        val title: TextView = itemView.findViewById(R.id.text_title)
+        val description: TextView = itemView.findViewById(R.id.text_description)
     }
 }
