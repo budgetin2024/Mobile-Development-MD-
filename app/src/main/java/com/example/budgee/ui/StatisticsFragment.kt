@@ -38,7 +38,6 @@ class StatisticsFragment : Fragment(R.layout.fragment_statistics) {
 
         // Initialize views
         selectedMonthTextView = view.findViewById(R.id.selectedMonth)
-        lineChart = view.findViewById(R.id.lineChart)
         transactionsRecyclerView = view.findViewById(R.id.transactionsRecyclerView)
 
         // Set up RecyclerView
@@ -95,54 +94,6 @@ class StatisticsFragment : Fragment(R.layout.fragment_statistics) {
         transactionsRecyclerView.adapter = transactionAdapter
 
         // Optionally update the chart
-        updateChart(filteredTransactions)
     }
 
-    private fun updateChart(filteredTransactions: List<Transaction>) {
-        // Example chart data
-        val incomeEntries = listOf(
-            Entry(0f, 300f),
-            Entry(1f, 400f),
-            Entry(2f, 500f),
-            Entry(3f, 450f)
-        )
-
-        val outcomeEntries = listOf(
-            Entry(0f, 200f),
-            Entry(1f, 350f),
-            Entry(2f, 400f),
-            Entry(3f, 300f)
-        )
-
-        // LineDataSets
-        val incomeDataSet = LineDataSet(incomeEntries, "Income").apply {
-            color = Color.BLUE
-            valueTextColor = Color.BLUE
-            lineWidth = 2f
-        }
-
-        val outcomeDataSet = LineDataSet(outcomeEntries, "Outcome").apply {
-            color = Color.RED
-            valueTextColor = Color.RED
-            lineWidth = 2f
-        }
-
-        // Set data to chart
-        lineChart.data = LineData(incomeDataSet, outcomeDataSet)
-        lineChart.description.isEnabled = false
-        lineChart.setTouchEnabled(true)
-        lineChart.setScaleEnabled(true)
-        lineChart.setPinchZoom(true)
-
-        // Customize legend
-        lineChart.legend.apply {
-            form = Legend.LegendForm.LINE
-            textSize = 12f
-        }
-
-        // Animate chart
-        lineChart.animateX(1500)
-
-
-    }
 }

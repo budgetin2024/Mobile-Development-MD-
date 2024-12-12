@@ -52,6 +52,7 @@
             android:background="@drawable/edit_text_border"
             android:hint="Username"
             android:inputType="text"
+            android:textColor="@color/black"
             android:padding="12dp" />
 
         <!-- Input Email dengan Border -->
@@ -62,6 +63,7 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/edit_text_border"
             android:hint="Email Address"
+            android:textColor="@color/black"
             android:inputType="textEmailAddress"
             android:padding="12dp" />
 
@@ -72,8 +74,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:background="@drawable/edit_text_border"
-            android:drawableEnd="@drawable/eye"
             android:hint="Password"
+            android:textColor="@color/black"
             android:inputType="textPassword"
             android:padding="12dp" />
 

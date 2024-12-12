@@ -15,6 +15,7 @@ import com.example.budgee.MainActivity
 class ProfileFragment : Fragment() {
 
     private lateinit var signOutButton: Button
+    private lateinit var editProfileButton: Button
     private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreateView(
@@ -28,10 +29,13 @@ class ProfileFragment : Fragment() {
 
         // Menemukan tombol Sign Out
         signOutButton = view.findViewById(R.id.signOutButton)
-
+        editProfileButton = view.findViewById(R.id.pengaturan)
         // Menangani klik tombol Sign Out
         signOutButton.setOnClickListener {
             logout()
+        }
+        editProfileButton.setOnClickListener{
+            editProfile()
         }
 
         return view
@@ -51,5 +55,10 @@ class ProfileFragment : Fragment() {
 
         // Menghentikan aktivitas atau mengakhiri sesi ini (opsional jika perlu)
         requireActivity().finish()
+    }
+
+    private fun editProfile() {
+
+        (requireActivity() as MainActivity).replaceFragmentInActivity(EditProfileFragment(), addToBackStack = true)
     }
 }

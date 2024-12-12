@@ -105,7 +105,7 @@ class CreateGoalsFragment : Fragment() {
             }
 
             // Membuat objek Goal dengan currentAmount
-            val goal = Goal("app_prefs", goalName, goalAmount, currentAmount, deadline)
+            val goal = Goal("user_id_example", goalName, goalAmount, currentAmount, deadline)
 
             // Panggil metode untuk membuat goal dengan token
             createGoal(goal, token)

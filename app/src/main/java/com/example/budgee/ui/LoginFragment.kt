@@ -83,8 +83,7 @@ class LoginFragment : Fragment() {
                         val token = loginResponse.token
                         if (!token.isNullOrEmpty()) {
                             // Save token to SharedPreferences
-                            val sharedPrefs =
-                                activity?.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                            val sharedPrefs = activity?.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                             sharedPrefs?.edit()?.putBoolean("is_logged_in", true)?.apply()
                             sharedPrefs?.edit()?.putString("auth_token", token)?.apply()
 

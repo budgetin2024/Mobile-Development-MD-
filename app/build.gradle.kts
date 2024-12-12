@@ -1,6 +1,8 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp") version "1.9.0-1.0.11"
 }
 
 android {
@@ -41,6 +43,7 @@ android {
 
 dependencies {
 
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.0")
@@ -72,9 +75,9 @@ dependencies {
 
     // SQLite
     implementation ("androidx.sqlite:sqlite:2.3.1")
-    implementation ("androidx.room:room-runtime:2.5.0")
-    annotationProcessor ("androidx.room:room-compiler:2.5.0")
-    implementation ("androidx.room:room-ktx:2.5.0")
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0") // Untuk Kotlin Extensions
+    ksp("androidx.room:room-compiler:2.5.0")
 
     // Core dependencies
     implementation(libs.androidx.core.ktx)
