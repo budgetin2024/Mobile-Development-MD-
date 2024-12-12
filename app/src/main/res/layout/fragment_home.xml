@@ -39,7 +39,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Selamat Datang!"
+                    android:text="Welcome! "
                     android:textStyle="bold"
                     android:textSize="15sp"
                     android:layout_marginLeft="10dp" />
@@ -96,7 +96,7 @@
                         android:id="@+id/defaultTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Jumlah Uang"
+                        android:text="Total Balance"
                         android:textSize="16sp"
                         android:textColor="@android:color/white"
                         android:textStyle="bold" />
@@ -107,7 +107,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Rp. 120.000.000"
+                        android:text=" "
                         android:textSize="28sp"
                         android:textColor="@android:color/white"
                         android:textStyle="bold" />

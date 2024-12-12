@@ -11,10 +11,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.example.budgee.MainActivity
 import com.example.budgee.R
 import com.example.budgee.api.TransactionsApi
 import com.example.budgee.json.TransactionRequest
+import com.example.budgee.json.TransactionResponse
+import com.example.budgee.model.HomeViewModel
 import com.google.android.material.button.MaterialButton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,6 +38,7 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
     private lateinit var remarksEditText: EditText
 
     private lateinit var transactionsApi: TransactionsApi
+    private val viewModel: HomeViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -177,5 +181,11 @@ class IncomeFragment : Fragment(), Category.CategorySelectionListener {
     override fun onDestroyView() {
         super.onDestroyView()
         (activity as? MainActivity)?.showBottomNavigation()
+    }
+
+    private fun onTransactionSuccess(response: TransactionResponse) {
+        viewModel.addNewTransaction(response)
+        viewModel.getCurrentState()
+        (requireActivity() as? MainActivity)?.replaceFragmentInActivity(HomeFragment())
     }
 }

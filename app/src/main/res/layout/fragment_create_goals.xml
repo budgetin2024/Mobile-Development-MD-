@@ -301,6 +301,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Enter your goal name"
                 android:inputType="text"
+                android:textColor="@color/black"
                 android:layout_marginBottom="16dp"/>
 
             <!-- Target Amount Section -->
@@ -318,7 +319,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your target amount"
-                android:inputType="numberDecimal"/>
+                android:inputType="numberDecimal"
+                android:textColor="@color/black"/>
+
 
             <!-- Deadline Section -->
             <TextView
@@ -339,7 +342,8 @@
                 android:inputType="none"
                 android:focusable="false"
                 android:clickable="true"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="16dp"
+                android:textColor="@color/black"/>
 
         </LinearLayout>
 

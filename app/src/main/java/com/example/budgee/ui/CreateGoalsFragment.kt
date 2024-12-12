@@ -15,15 +15,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.example.budgee.MainActivity
 import com.example.budgee.R
-import com.example.budgee.database.Category
-import com.example.budgee.database.DatabaseProvider
 import com.example.budgee.json.Goal
 import com.example.budgee.json.GoalApi
 import com.example.budgee.json.RetrofitInstance
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -125,13 +121,6 @@ class CreateGoalsFragment : Fragment() {
             selectedCategoryTextView.text = "Selected Category: $categoryName"  // Display the selected category
             highlightSelectedCategory(categoryIcon)
 
-            // Save selected category to Room Database
-            lifecycleScope.launch {
-                val category = Category(name = categoryName)
-                val db = DatabaseProvider.getDatabase(requireContext())
-                db.categoryDao().insertCategory(category)
-                Toast.makeText(requireContext(), "$categoryName saved locally", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 

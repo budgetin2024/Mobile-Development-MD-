@@ -210,7 +210,8 @@
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
                     android:hint="Write a note"
-                    android:textColor="#757575"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
                     android:textSize="16sp" />
             </LinearLayout>
 

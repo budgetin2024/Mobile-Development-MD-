@@ -64,8 +64,9 @@ dependencies {
 
     // Lifecycle-aware components
     implementation ("androidx.cardview:cardview:1.0.0")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation ("androidx.fragment:fragment-ktx:1.5.7")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
 
     // Navigation Component
     implementation ("androidx.navigation:navigation-fragment-ktx:2.7.3")
