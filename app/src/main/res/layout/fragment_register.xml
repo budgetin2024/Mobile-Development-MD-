@@ -52,8 +52,7 @@
             android:background="@drawable/edit_text_border"
             android:hint="Username"
             android:inputType="text"
-            android:padding="12dp"
-            android:textColor="@color/black"/>
+            android:padding="12dp" />
 
         <!-- Input Email dengan Border -->
         <EditText
@@ -64,8 +63,7 @@
             android:background="@drawable/edit_text_border"
             android:hint="Email Address"
             android:inputType="textEmailAddress"
-            android:padding="12dp"
-            android:textColor="@color/black"/>
+            android:padding="12dp" />
 
         <!-- Input Password dengan Border -->
         <EditText
@@ -77,8 +75,7 @@
             android:drawableEnd="@drawable/eye"
             android:hint="Password"
             android:inputType="textPassword"
-            android:padding="12dp"
-            android:textColor="@color/black"/>
+            android:padding="12dp" />
 
         <!-- Tombol Sign Up -->
         <Button

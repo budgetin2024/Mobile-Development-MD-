@@ -10,8 +10,8 @@
     <!-- Stats -->
     <item
         android:id="@+id/nav_stats"
-        android:icon="@drawable/baseline_insert_chart_outlined_24"
-        android:title="Stats" />
+        android:icon="@drawable/baseline_history_24"
+        android:title="History" />
 
     <!-- Add -->
     <item

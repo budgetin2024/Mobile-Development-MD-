@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.budgee.MainActivity
@@ -35,6 +36,11 @@ class RegisterFragment : Fragment() {
         val emailInput = view.findViewById<EditText>(R.id.email)
         val passwordInput = view.findViewById<EditText>(R.id.password)
         val signUpButton = view.findViewById<MaterialButton>(R.id.btn_sign_up)
+        val loginLink = view.findViewById<TextView>(R.id.login_link)
+
+        loginLink.setOnClickListener {
+            (activity as MainActivity).replaceFragmentInActivity(LoginFragment())
+        }
 
         signUpButton.setOnClickListener {
             val name = nameInput.text.toString().trim()

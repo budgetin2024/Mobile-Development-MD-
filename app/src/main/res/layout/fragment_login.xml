@@ -51,6 +51,7 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/edit_text_border"
             android:hint="Email Address"
+            android:textColor="@color/black"
             android:inputType="textEmailAddress"
             android:padding="12dp"
             android:textColor="@color/black"/>
@@ -62,22 +63,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:background="@drawable/edit_text_border"
-            android:drawableEnd="@drawable/eye"
             android:hint="Password"
+            android:textColor="@color/black"
             android:inputType="textPassword"
             android:padding="12dp"
             android:textColor="@color/black"/>
 
-        <!-- Forgot Password Link -->
-        <TextView
-            android:id="@+id/forgot_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginTop="8dp"
-            android:padding="4dp"
-            android:text="Forgot Password?"
-            android:textColor="@color/blue" />
+
 
         <!-- Sign Up Button -->
         <Button

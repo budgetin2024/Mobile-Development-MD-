@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:gravity="center"
-                    android:text="Statistics"
+                    android:text="History"
                     android:textColor="@android:color/white"
                     android:textSize="25sp"
                     android:textStyle="bold" />
@@ -102,15 +102,6 @@
                             android:layout_gravity="center_vertical"
                             app:tint="@color/black" />
                     </LinearLayout>
-
-                    <!-- LineChart Placeholder -->
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/lineChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@android:color/white"
-                        android:elevation="4dp" />
 
                     <!-- Chart Legend -->
                     <LinearLayout
