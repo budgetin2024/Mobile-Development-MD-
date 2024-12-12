@@ -5,6 +5,7 @@
     import android.view.View
     import android.view.ViewGroup
     import android.widget.Button
+    import android.widget.ImageView
     import androidx.fragment.app.Fragment
     import com.example.budgee.R
     import com.example.budgee.MainActivity
@@ -32,6 +33,22 @@
             }
 
             return view
+        }
+
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+
+            // Inisialisasi back icon
+            val backIcon = view.findViewById<ImageView>(R.id.backIcon)
+            
+            // Set click listener untuk back icon
+            backIcon.setOnClickListener {
+                // Kembali ke HomeFragment
+                (activity as? MainActivity)?.apply {
+                    replaceFragmentInActivity(HomeFragment(), false) // false agar tidak ditambahkan ke back stack
+                    showBottomNavigation() // Pastikan bottom navigation muncul
+                }
+            }
         }
 
         private fun navigateToCreateGoal() {

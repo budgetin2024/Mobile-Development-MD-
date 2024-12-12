@@ -1,85 +1,44 @@
 package com.example.budgee.model
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.budgee.json.TransactionResponse
+import com.example.budgee.json.User
+import java.util.*
 
 class HomeViewModel : ViewModel() {
     private val _currentBalance = MutableLiveData<Double>()
     val currentBalance: LiveData<Double> = _currentBalance
 
-    private val _incomeTransactions = MutableLiveData<MutableList<TransactionResponse>>()
-    val incomeTransactions: LiveData<MutableList<TransactionResponse>> = _incomeTransactions
+    private val _incomeTransactions = MutableLiveData<List<TransactionResponse>>()
+    val incomeTransactions: LiveData<List<TransactionResponse>> = _incomeTransactions
 
-    private val _outcomeTransactions = MutableLiveData<MutableList<TransactionResponse>>()
-    val outcomeTransactions: LiveData<MutableList<TransactionResponse>> = _outcomeTransactions
+    private val _outcomeTransactions = MutableLiveData<List<TransactionResponse>>()
+    val outcomeTransactions: LiveData<List<TransactionResponse>> = _outcomeTransactions
+
+    private val _userData = MutableLiveData<User>()
+    val userData: LiveData<User> = _userData
 
     init {
-        _incomeTransactions.value = mutableListOf()
-        _outcomeTransactions.value = mutableListOf()
+        _incomeTransactions.value = listOf()
+        _outcomeTransactions.value = listOf()
         _currentBalance.value = 0.0
     }
 
-    fun updateBalance() {
-        val incomeTotal = _incomeTransactions.value?.sumOf { it.amount } ?: 0.0
-        val outcomeTotal = _outcomeTransactions.value?.sumOf { it.amount } ?: 0.0
-        
-        android.util.Log.d("HomeViewModel", """
-            Income Transactions Detail:
-            ${_incomeTransactions.value?.joinToString("\n") { 
-                "- Amount: ${it.amount}, Type: ${it.type}, Category: ${it.category}"
-            }}
-            
-            Outcome Transactions Detail:
-            ${_outcomeTransactions.value?.joinToString("\n") { 
-                "- Amount: ${it.amount}, Type: ${it.type}, Category: ${it.category}"
-            }}
-            
-            Calculating balance:
-            Income Total: $incomeTotal
-            Outcome Total: $outcomeTotal
-            New Balance: ${incomeTotal - outcomeTotal}
-        """.trimIndent())
-        
-        _currentBalance.value = incomeTotal - outcomeTotal
-    }
-
-    fun setIncomeTransactions(transactions: List<TransactionResponse>) {
-        val incomeOnly = transactions.filter { it.type.lowercase() == "income" }
-        android.util.Log.d("HomeViewModel", "Setting income transactions: ${incomeOnly.size}")
-        _incomeTransactions.value = incomeOnly.toMutableList()
-        updateBalance()
-    }
-
-    fun setOutcomeTransactions(transactions: List<TransactionResponse>) {
-        val outcomeOnly = transactions.filter { 
-            it.type.lowercase() in listOf("outcome", "expense") 
-        }
-        android.util.Log.d("HomeViewModel", "Setting outcome transactions: ${outcomeOnly.size}")
-        _outcomeTransactions.value = outcomeOnly.toMutableList()
-        updateBalance()
-    }
-
     fun addNewTransaction(transaction: TransactionResponse) {
-        android.util.Log.d("HomeViewModel", """
-            Adding new transaction:
-            Type: ${transaction.type}
-            Amount: ${transaction.amount}
-            Category: ${transaction.category}
-        """.trimIndent())
-
-        when (transaction.type.lowercase()) {
+        when (transaction.type?.lowercase(Locale.getDefault()) ?: "") {
             "income" -> {
-                val currentList = _incomeTransactions.value ?: mutableListOf()
+                val currentList = _incomeTransactions.value?.toMutableList() ?: mutableListOf()
                 currentList.add(transaction)
                 _incomeTransactions.value = currentList
-                android.util.Log.d("HomeViewModel", "Income transactions now: ${currentList.size}")
+                android.util.Log.d("HomeViewModel", "Added income transaction: ${transaction.amount}")
             }
-            "expense", "outcome" -> {
-                val currentList = _outcomeTransactions.value ?: mutableListOf()
+            "expense" -> {
+                val currentList = _outcomeTransactions.value?.toMutableList() ?: mutableListOf()
                 currentList.add(transaction)
                 _outcomeTransactions.value = currentList
-                android.util.Log.d("HomeViewModel", "Outcome transactions now: ${currentList.size}")
+                android.util.Log.d("HomeViewModel", "Added expense transaction: ${transaction.amount}")
             }
             else -> {
                 android.util.Log.e("HomeViewModel", "Unknown transaction type: ${transaction.type}")
@@ -89,27 +48,50 @@ class HomeViewModel : ViewModel() {
         updateBalance()
     }
 
-    private fun verifyTransactionType(transaction: TransactionResponse): Boolean {
-        return when (transaction.type.lowercase()) {
-            "income" -> true
-            "outcome", "expense" -> true
-            else -> false
-        }
+    fun setIncomeTransactions(transactions: List<TransactionResponse>) {
+        _incomeTransactions.value = transactions
+        android.util.Log.d("HomeViewModel", "Set income transactions: ${transactions.size} items")
+        updateBalance()
     }
 
-    fun getTransactionLists(): String {
-        return """
-            Income Transactions (${_incomeTransactions.value?.size ?: 0}):
-            ${_incomeTransactions.value?.joinToString("\n") { "- ${it.amount} (${it.type})" }}
-            
-            Outcome Transactions (${_outcomeTransactions.value?.size ?: 0}):
-            ${_outcomeTransactions.value?.joinToString("\n") { "- ${it.amount} (${it.type})" }}
-            
-            Current Balance: ${_currentBalance.value}
-        """.trimIndent()
+    fun setOutcomeTransactions(transactions: List<TransactionResponse>) {
+        _outcomeTransactions.value = transactions
+        android.util.Log.d("HomeViewModel", "Set outcome transactions: ${transactions.size} items")
+        updateBalance()
+    }
+
+    fun setUserData(user: User) {
+        _userData.value = user
+    }
+
+    private fun updateBalance() {
+        val totalIncome = _incomeTransactions.value?.filter { it.type == "income" }?.sumOf { it.amount } ?: 0.0
+        val totalOutcome = _outcomeTransactions.value?.filter { it.type == "expense" }?.sumOf { it.amount } ?: 0.0
+        _currentBalance.value = totalIncome - totalOutcome
+        
+        android.util.Log.d("HomeViewModel", """
+            Balance Updated:
+            Total Income: $totalIncome
+            Total Outcome: $totalOutcome
+            New Balance: ${_currentBalance.value}
+        """.trimIndent())
     }
 
     fun getCurrentState() {
-        android.util.Log.d("HomeViewModel", getTransactionLists())
+        updateBalance()
+    }
+
+    fun initializeFromSharedPreferences(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val userName = sharedPreferences.getString("user_name", null)
+        val userEmail = sharedPreferences.getString("user_email", null)
+        
+        if (!userName.isNullOrEmpty()) {
+            _userData.value = User(
+                id = "", // ID tidak perlu disimpan di SharedPreferences
+                name = userName,
+                email = userEmail ?: ""
+            )
+        }
     }
 }

@@ -15,8 +15,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.example.budgee.MainActivity
 import com.example.budgee.R
-import com.example.budgee.api.TransactionsApi
 import com.example.budgee.json.TransactionRequest
+import com.example.budgee.json.TransactionResponse
+import com.example.budgee.json.TransactionsApi
 import com.example.budgee.model.HomeViewModel
 import com.google.android.material.button.MaterialButton
 import okhttp3.OkHttpClient
@@ -150,18 +151,22 @@ class OutcomeFragment : Fragment(), Category.CategorySelectionListener {
         }
     }
 
+
     private fun saveTransaction(transaction: TransactionRequest) {
-        transactionsApi.addTransaction(transaction).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
+        transactionsApi.addTransaction(transaction).enqueue(object : Callback<TransactionResponse> {
+            override fun onResponse(call: Call<TransactionResponse>, response: Response<TransactionResponse>) {
+                if (response.isSuccessful && response.body() != null) {
                     Toast.makeText(context, "Outcome saved successfully", Toast.LENGTH_SHORT).show()
-                    parentFragmentManager.popBackStack()
+                    response.body()?.let { transactionResponse ->
+                        viewModel.addNewTransaction(transactionResponse)
+                    }
+                    (requireActivity() as MainActivity).replaceFragmentInActivity(HomeFragment())
                 } else {
                     Toast.makeText(context, "Failed to save outcome", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
+            override fun onFailure(call: Call<TransactionResponse>, t: Throwable) {
                 Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

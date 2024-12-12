@@ -33,15 +33,16 @@
                     android:id="@+id/profileIcon"
                     android:layout_width="42dp"
                     android:layout_height="42dp"
-                    android:src="@drawable/baseline_account_circle_24"
-                    app:tint="@android:color/white" />
+                    android:src="@drawable/pepepeppepep"
+                    app:tint="@android:color/black" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Welcome! "
                     android:textStyle="bold"
-                    android:textSize="15sp"
+                    android:textSize="17sp"
+                    android:textColor="@color/black"
                     android:layout_marginLeft="10dp" />
 
                 <TextView
@@ -51,7 +52,7 @@
                     android:text="Jamal"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"
-                    android:textSize="15sp" />
+                    android:textSize="17sp" />
 
                 <View
                     android:layout_width="0dp"
@@ -150,12 +151,12 @@
                                 android:textColor="@android:color/white" />
 
                             <TextView
-                                android:id="@+id/expenseAmount"
+                                android:id="@+id/incomeAmount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Rp. 2,176.443"
-                                android:textSize="16sp"
                                 android:textColor="@android:color/white"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
 
@@ -182,7 +183,7 @@
                                 android:textColor="@android:color/white" />
 
                             <TextView
-                                android:id="@+id/incomeAmount"
+                                android:id="@+id/expenseAmount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Rp. 4,500.000"

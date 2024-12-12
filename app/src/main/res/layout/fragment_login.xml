@@ -53,8 +53,7 @@
             android:hint="Email Address"
             android:textColor="@color/black"
             android:inputType="textEmailAddress"
-            android:padding="12dp"
-            android:textColor="@color/black"/>
+            android:padding="12dp"/>
 
         <!-- Password Input -->
         <EditText
@@ -64,7 +63,6 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/edit_text_border"
             android:hint="Password"
-            android:textColor="@color/black"
             android:inputType="textPassword"
             android:padding="12dp"
             android:textColor="@color/black"/>

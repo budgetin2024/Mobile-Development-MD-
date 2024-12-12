@@ -40,12 +40,23 @@ class CreateGoalsFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_create_goals, container, false)
 
-        // Initialize the EditTexts, Button, and TextView
+        // Initialize views
         deadlineEditText = view.findViewById(R.id.deadlineEditText)
         goalNameEditText = view.findViewById(R.id.goalName)
         goalAmountEditText = view.findViewById(R.id.goalAmount)
         createGoalButton = view.findViewById(R.id.createGoalButton)
         selectedCategoryTextView = view.findViewById(R.id.selectedCategoryTextView)
+
+        // Inisialisasi dan set click listener untuk back icon
+        val backIcon = view.findViewById<ImageView>(R.id.backIcon)
+        backIcon.setOnClickListener {
+            android.util.Log.d("CreateGoalsFragment", "Back icon clicked")
+            // Kembali ke GoalsFragment
+            (requireActivity() as MainActivity).apply {
+                replaceFragmentInActivity(GoalsFragment())
+                showBottomNavigation()
+            }
+        }
 
         // Set the click listener to show DatePickerDialog
         deadlineEditText.setOnClickListener {

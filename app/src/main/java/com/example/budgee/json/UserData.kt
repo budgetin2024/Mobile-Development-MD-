@@ -1,8 +1,13 @@
 package com.example.budgee.json
 
+import com.google.gson.annotations.SerializedName
+
 data class UserData(
-    val id: String,
-    val name: String,
-    val email: String,
-    // Add other fields as needed
+    @SerializedName("user") val user: User
+)
+
+data class User(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("email") val email: String
 )
