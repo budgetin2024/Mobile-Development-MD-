@@ -17,22 +17,48 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.budgee.MainActivity
 import com.example.budgee.R
-import com.example.budgee.json.Goal
 import com.example.budgee.json.GoalApi
-import com.example.budgee.json.RetrofitInstance
+import com.example.budgee.json.GoalRequest
+import com.example.budgee.json.GoalsResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.*
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import androidx.appcompat.app.AppCompatActivity
+import com.example.budgee.json.Goal
 
 class CreateGoalsFragment : Fragment() {
 
+    private val BASE_URL = "https://backend-budgetin.et.r.appspot.com/"
+
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
+        .build()
+
+    private val goalApi = retrofit.create(GoalApi::class.java)
+
     private lateinit var deadlineEditText: EditText
-    private lateinit var goalNameEditText: EditText
     private lateinit var goalAmountEditText: EditText
     private lateinit var createGoalButton: Button
     private lateinit var selectedCategoryTextView: TextView
     private var selectedCategory: String? = null
+    private var selectedDate: String? = null
+    private lateinit var goalNameEditText: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,23 +66,15 @@ class CreateGoalsFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_create_goals, container, false)
 
-        // Initialize views
+        // Sembunyikan Bottom Navigation saat fragment dibuat
+        (activity as? MainActivity)?.hideBottomNavigation()
+
+        // Initialize the EditTexts, Button, and TextView
         deadlineEditText = view.findViewById(R.id.deadlineEditText)
-        goalNameEditText = view.findViewById(R.id.goalName)
         goalAmountEditText = view.findViewById(R.id.goalAmount)
         createGoalButton = view.findViewById(R.id.createGoalButton)
         selectedCategoryTextView = view.findViewById(R.id.selectedCategoryTextView)
-
-        // Inisialisasi dan set click listener untuk back icon
-        val backIcon = view.findViewById<ImageView>(R.id.backIcon)
-        backIcon.setOnClickListener {
-            android.util.Log.d("CreateGoalsFragment", "Back icon clicked")
-            // Kembali ke GoalsFragment
-            (requireActivity() as MainActivity).apply {
-                replaceFragmentInActivity(GoalsFragment())
-                showBottomNavigation()
-            }
-        }
+        goalNameEditText = view.findViewById(R.id.goalNameEditText)
 
         // Set the click listener to show DatePickerDialog
         deadlineEditText.setOnClickListener {
@@ -72,6 +90,7 @@ class CreateGoalsFragment : Fragment() {
                     // Set the selected date to the EditText in dd/MM/yyyy format
                     val date = "$selectedDay/${selectedMonth + 1}/$selectedYear"
                     deadlineEditText.setText(date)
+                    selectedDate = date
                 },
                 year, month, day
             )
@@ -90,38 +109,16 @@ class CreateGoalsFragment : Fragment() {
 
         // Set up button click to create a goal
         createGoalButton.setOnClickListener {
-            val goalName = goalNameEditText.text.toString()
-            val goalAmount = goalAmountEditText.text.toString().toDoubleOrNull()
-            val deadline = deadlineEditText.text.toString()
-
-            if (goalName.isEmpty() || goalAmount == null || deadline.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Ambil currentAmount (misalnya, bisa diambil dari EditText atau nilai lainnya)
-            val currentAmount = 0.0  // Misalnya, bisa diambil dari EditText atau data lain
-
-            // Ambil userId dari SharedPreferences atau sumber lain
-            val sharedPreferences = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            val token = sharedPreferences.getString("auth_token", null)
-
-            if (token == null) {
-                Toast.makeText(requireContext(), "Token not found. Please log in again.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Membuat objek Goal dengan currentAmount
-            val goal = Goal("user_id_example", goalName, goalAmount, currentAmount, deadline)
-
-            // Panggil metode untuk membuat goal dengan token
-            createGoal(goal, token)
+            createGoal()
         }
 
-        // Hide the Bottom Navigation when CreateGoalsFragment is active
-        (activity as? MainActivity)?.hideBottomNavigation()
-
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Pastikan bottom navigation tetap tersembunyi saat fragment di-resume
+        (activity as? MainActivity)?.hideBottomNavigation()
     }
 
     // Set listener for category selection on icon click
@@ -129,9 +126,8 @@ class CreateGoalsFragment : Fragment() {
         val categoryIcon = view.findViewById<LinearLayout>(categoryId)
         categoryIcon.setOnClickListener {
             selectedCategory = categoryName
-            selectedCategoryTextView.text = "Selected Category: $categoryName"  // Display the selected category
+            selectedCategoryTextView.text = "Selected Category: $categoryName"
             highlightSelectedCategory(categoryIcon)
-
         }
     }
 
@@ -156,41 +152,149 @@ class CreateGoalsFragment : Fragment() {
             view?.findViewById<LinearLayout>(R.id.entertainmentCategory),
             view?.findViewById<LinearLayout>(R.id.propertyCategory)
         )
-
         for (icon in icons) {
             val imageView = icon?.getChildAt(0) as ImageView
             imageView.clearColorFilter()  // Reset color filter
         }
     }
 
-    private fun createGoal(goal: Goal, token: String) {
-        // Ambil instance GoalApi dari RetrofitInstance
-        val goalApi = RetrofitInstance.goalsRetrofit.create(GoalApi::class.java)
+    private fun getToken(): String? {
+        val sharedPreferences = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("auth_token", null)
+    }
 
-        // Buat permintaan API dengan menambahkan header Authorization dan data goal yang baru
-        goalApi.createGoalWithAuth(goal, "Bearer $token").enqueue(object : Callback<Goal> {
-            override fun onResponse(call: Call<Goal>, response: Response<Goal>) {
-                if (response.isSuccessful) {
-                    Toast.makeText(requireContext(), "Goal created successfully", Toast.LENGTH_SHORT).show()
-                    Log.d("CreateGoal", "Response successful: ${response.body()}")
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "No error body"
-                    Toast.makeText(requireContext(), "Failed to create goal", Toast.LENGTH_SHORT).show()
-                    Log.e("CreateGoal", "Error: ${response.message()}")
-                    Log.e("CreateGoal", "Error body: $errorBody")
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            override fun onFailure(call: Call<Goal>, t: Throwable) {
-                Toast.makeText(requireContext(), "Error: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
-                Log.e("CreateGoal", "Failure: ${t.localizedMessage}")
+        // Inisialisasi back icon
+        val backIcon = view.findViewById<ImageView>(R.id.backIcon)
+
+        // Set click listener untuk back icon
+        backIcon.setOnClickListener {
+            // Kembali ke HomeFragment
+            (activity as? MainActivity)?.apply {
+                replaceFragmentInActivity(GoalsFragment(), false) // false agar tidak ditambahkan ke back stack
+                showBottomNavigation() // Pastikan bottom navigation muncul
             }
-        })
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Show Bottom Navigation again when leaving CreateGoalsFragment
-        (activity as? MainActivity)?.showBottomNavigation()
+        // Tampilkan kembali Bottom Navigation saat meninggalkan fragment
+        (activity as? MainActivity)?.hideBottomNavigation()
+    }
+
+    private fun createGoal() {
+        val goalAmount = goalAmountEditText.text.toString().toDoubleOrNull() ?: 0.0
+        val deadline = selectedDate ?: "" // pastikan selectedDate tidak null
+
+        // Validasi input
+        if (goalAmount <= 0) {
+            goalAmountEditText.error = "Jumlah goal harus lebih dari 0"
+            return
+        }
+        if (deadline.isEmpty()) {
+            Toast.makeText(context, "Pilih tanggal deadline", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val token = getToken()
+        if (token != null) {
+            createGoal(token)
+        }
+    }
+
+    private fun createGoal(token: String) {
+        val goalAmount = try {
+            goalAmountEditText.text.toString().toBigDecimal().toDouble()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Jumlah tidak valid", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val goalName = goalNameEditText.text.toString().trim()
+        val deadline = deadlineEditText.text.toString()
+        
+        if (goalAmount <= 0 || deadline.isEmpty() || selectedCategory == null || goalName.isEmpty()) {
+            Toast.makeText(requireContext(), "Mohon lengkapi semua field", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Format tanggal
+        val inputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        
+        val date = inputFormat.parse(deadline)
+        val formattedDate = date?.let { outputFormat.format(it) } ?: return
+
+        // Buat request dengan format yang baru
+        val goalRequest = GoalRequest(
+            goalName = goalName,
+            goalAmount = goalAmount,
+            currentAmount = 0.0,
+            deadline = formattedDate,
+            category = selectedCategory!!.lowercase()
+        )
+
+        // Log request yang akan dikirim
+        Log.d("CreateGoal", """
+            Request Data:
+            {
+                "goalName": "${goalRequest.goalName}",
+                "goalAmount": ${goalRequest.goalAmount},
+                "currentAmount": ${goalRequest.currentAmount},
+                "deadline": "${goalRequest.deadline}",
+                "category": "${goalRequest.category}"
+            }
+        """.trimIndent())
+
+        // Kirim request
+        goalApi.createGoalWithAuth(goalRequest, "Bearer $token").enqueue(object : Callback<Goal> {
+            override fun onResponse(call: Call<Goal>, response: Response<Goal>) {
+                // Cek apakah fragment masih attached
+                if (!isAdded) return
+
+                if (response.isSuccessful) {
+                    val createdGoal = response.body()
+                    Log.d("CreateGoal", "Success Response: $createdGoal")
+                    
+                    activity?.runOnUiThread {
+                        Toast.makeText(context, "Goal berhasil dibuat", Toast.LENGTH_SHORT).show()
+                        
+                        // Refresh goals list di GoalsFragment jika masih attached
+                        (parentFragment as? GoalsFragment)?.refreshGoals()
+                        
+                        // Kembali ke fragment sebelumnya
+                        activity?.supportFragmentManager?.popBackStack()
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("CreateGoal", "Error Response: ${response.code()}")
+                    Log.e("CreateGoal", "Error Body: $errorBody")
+                    
+                    activity?.runOnUiThread {
+                        when {
+                            errorBody?.contains("same name already exists") == true -> {
+                                Toast.makeText(context, "Goal dengan nama yang sama sudah ada", Toast.LENGTH_SHORT).show()
+                            }
+                            else -> {
+                                Toast.makeText(context, "Gagal membuat goal: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<Goal>, t: Throwable) {
+                // Cek apakah fragment masih attached
+                if (!isAdded) return
+                
+                Log.e("CreateGoal", "Network Error: ${t.message}")
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "Error koneksi: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
     }
 }

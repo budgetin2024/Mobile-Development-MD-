@@ -7,9 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgee.R
-import com.example.budgee.model.Transaction
+import com.example.budgee.json.TransactionItem
 
-class TransactionAdapter(private val transactionList: List<Transaction>) :
+class TransactionAdapter(private val transactionList: List<TransactionItem>) :
     RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -19,15 +19,12 @@ class TransactionAdapter(private val transactionList: List<Transaction>) :
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactionList[position]
-        holder.transactionIcon.setImageResource(transaction.imageRes)
-        holder.transactionCategory.text = transaction.title
+        holder.transactionCategory.text = transaction.category
         holder.transactionDate.text = transaction.date
-        holder.transactionAmount.text = transaction.amount
+        holder.transactionAmount.text = "Rp${transaction.amount}"
     }
 
-    override fun getItemCount(): Int {
-        return transactionList.size
-    }
+    override fun getItemCount(): Int = transactionList.size
 
     class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val transactionIcon: ImageView = itemView.findViewById(R.id.transactionIcon)

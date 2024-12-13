@@ -156,4 +156,12 @@ class MainActivity : AppCompatActivity() {
         val sharedPrefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         return sharedPrefs.getBoolean("is_logged_in", false) // Assuming 'is_logged_in' is stored here
     }
+
+    fun refreshGoalsData() {
+        // Cari fragment goals yang aktif
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (fragment is GoalsFragment) {
+            fragment.refreshGoals()
+        }
+    }
 }

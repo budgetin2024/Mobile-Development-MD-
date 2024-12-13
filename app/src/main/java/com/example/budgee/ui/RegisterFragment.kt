@@ -2,6 +2,8 @@ package com.example.budgee.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -64,25 +66,47 @@ class RegisterFragment : Fragment() {
         val authApiService = RetrofitInstance.authRetrofit.create(com.example.budgee.json.AuthApiService::class.java)
         val registerRequest = RegisterRequest(name, email, password)
 
+        Log.d("RegisterFragment", "Memulai proses registrasi untuk email: $email")
+
         authApiService.registerUser(registerRequest).enqueue(object : Callback<RegisterResponse> {
             override fun onResponse(call: Call<RegisterResponse>, response: Response<RegisterResponse>) {
-                if (response.isSuccessful) {
-                    val registerResponse = response.body()
-                    if (registerResponse?.success == true) {
-                        Toast.makeText(requireContext(), "Registration successful!", Toast.LENGTH_SHORT).show()
-                        (activity as MainActivity).replaceFragmentInActivity(LoginFragment())
+                Log.d("RegisterFragment", "Response received: ${response.code()}")
+                Log.d("RegisterFragment", "Response body: ${response.body()}")
+                
+                activity?.runOnUiThread {
+                    if (response.isSuccessful) {
+                        val registerResponse = response.body()
+                        if (registerResponse?.message?.contains("successfully", ignoreCase = true) == true) {
+                            Log.d("RegisterFragment", "Registrasi berhasil, mencoba navigasi ke LoginFragment")
+                            
+                            // Tampilkan pesan sukses
+                            Toast.makeText(requireContext(), "Registrasi berhasil! Silakan login.", Toast.LENGTH_SHORT).show()
+                            
+                            try {
+                                // Langsung navigasi ke LoginFragment
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.fragment_container, LoginFragment())
+                                    .commit()
+                            } catch (e: Exception) {
+                                Log.e("RegisterFragment", "Error during navigation: ${e.message}")
+                            }
+                        } else {
+                            val errorMessage = registerResponse?.error ?: registerResponse?.message ?: "Registrasi gagal"
+                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                            Log.e("RegisterFragment", "Registration failed: $errorMessage")
+                        }
                     } else {
-                        // Menampilkan pesan kesalahan jika ada
-                        val errorMessage = registerResponse?.error ?: registerResponse?.message ?: "Registration failed"
-                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Registrasi gagal", Toast.LENGTH_SHORT).show()
+                        Log.e("RegisterFragment", "Registration failed with code: ${response.code()}")
                     }
-                } else {
-                    Toast.makeText(requireContext(), "Registration failed", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
-                Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("RegisterFragment", "Network error: ${t.message}")
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }

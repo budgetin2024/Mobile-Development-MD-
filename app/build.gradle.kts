@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,6 +10,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        mlModelBinding = true
     }
 
     defaultConfig {
@@ -48,6 +48,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.0")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation ("org.tensorflow:tensorflow-lite:2.9.0")
 
     // Core dependencies
     implementation ("androidx.core:core-ktx:1.12.0")
@@ -78,8 +79,12 @@ dependencies {
     // SQLite
     implementation ("androidx.sqlite:sqlite:2.3.1")
     implementation("androidx.room:room-runtime:2.5.0")
-    implementation("androidx.room:room-ktx:2.5.0") // Untuk Kotlin Extensions
+    implementation("androidx.room:room-ktx:2.5.0")
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
+    implementation(libs.tensorflow.lite.gpu) // Untuk Kotlin Extensions
     ksp("androidx.room:room-compiler:2.5.0")
+
 
     // Core dependencies
     implementation(libs.androidx.core.ktx)
@@ -95,4 +100,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
 }

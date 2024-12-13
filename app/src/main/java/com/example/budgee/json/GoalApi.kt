@@ -1,17 +1,40 @@
 package com.example.budgee.json
 
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface GoalApi {
+    @GET("goals")
+    fun getGoals(@Header("Authorization") token: String): Call<GoalsResponse>
 
-    // Menambahkan header Authorization dengan token
     @POST("goals")
     fun createGoalWithAuth(
-        @Body goal: Goal,
-        @Header("Authorization") authToken: String
+        @Body goalRequest: GoalRequest,
+        @Header("Authorization") token: String
     ): Call<Goal>
 
+    @DELETE("goals/delete/{id}")
+    fun deleteGoal(
+        @Path("id") goalId: String,
+        @Header("Authorization") token: String
+    ): Call<Void>
+
+    @PUT("goals/{id}")
+    fun updateGoal(
+        @Path("id") goalId: String,
+        @Body goalRequest: GoalRequest,
+        @Header("Authorization") token: String
+    ): Call<Goal>
+
+    @PUT("goals/{id}/progress")
+    fun updateGoalProgress(
+        @Path("id") goalId: String,
+        @Body progressRequest: ProgressRequest,
+        @Header("Authorization") token: String
+    ): Call<Goal>
 }
+
+data class ProgressRequest(
+    val progress: Double
+)
+

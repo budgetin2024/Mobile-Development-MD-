@@ -1,5 +1,6 @@
 package com.example.budgee.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.budgee.MainActivity
 import com.example.budgee.R
+import com.example.budgee.adapter.GoalAdapter
 import com.example.budgee.json.ApiService
+import com.example.budgee.json.Goal
+import com.example.budgee.json.GoalApi
+import com.example.budgee.json.GoalsResponse
 import com.example.budgee.model.GoalItem
 import com.example.budgee.json.TransactionResponse
 import com.example.budgee.json.TransactionsApi
@@ -49,6 +54,25 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by activityViewModels()
 
+    private val BASE_URL = "https://backend-budgetin.et.r.appspot.com/"
+    private lateinit var goalAdapter: GoalAdapter
+
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
+        .build()
+
+    private val goalApi = retrofit.create(GoalApi::class.java)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -57,8 +81,7 @@ class HomeFragment : Fragment() {
 
         // Initialize Views
         goalsRecyclerView = view.findViewById(R.id.goalsRecyclerView)
-        goalsRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
+        
         profileIcon = view.findViewById(R.id.profileIcon)
         cardGoals = view.findViewById(R.id.cardViewGoals)
         cardStatistics = view.findViewById(R.id.cardViewStatistic)
@@ -106,6 +129,9 @@ class HomeFragment : Fragment() {
 
         // Panggil getUserData untuk mendapatkan nama user dari API
         getUserData()
+
+        // Initialize RecyclerView
+        setupRecyclerView()
 
         return view
     }
@@ -239,35 +265,36 @@ class HomeFragment : Fragment() {
 
         val transactionsApi = retrofit.create(TransactionsApi::class.java)
 
-           transactionsApi.getTransactions(type = "expense").enqueue(object : Callback<TransactionsResponse> {
-        override fun onResponse(call: Call<TransactionsResponse>, response: Response<TransactionsResponse>) {
-            if (response.isSuccessful) {
-                val transactions = response.body()?.transactions ?: emptyList()
-                android.util.Log.d("HomeFragment", "Raw Outcome Response: ${response.body()}")
-                android.util.Log.d("HomeFragment", "Outcome Transactions Count: ${transactions.size}")
-                viewModel.setOutcomeTransactions(transactions)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                android.util.Log.e("HomeFragment", "Outcome API Failed: ${response.code()}")
-                android.util.Log.e("HomeFragment", "Error Body: $errorBody")
-                
-                // Handle 404 case
-                if (response.code() == 404) {
-                    viewModel.setOutcomeTransactions(emptyList())
+        transactionsApi.getTransactions(type = "expense").enqueue(object : Callback<TransactionsResponse> {
+            override fun onResponse(call: Call<TransactionsResponse>, response: Response<TransactionsResponse>) {
+                if (response.isSuccessful) {
+                    val transactions = response.body()?.transactions ?: emptyList()
+                    android.util.Log.d("HomeFragment", "Raw Outcome Response: ${response.body()}")
+                    android.util.Log.d("HomeFragment", "Outcome Transactions Count: ${transactions.size}")
+                    viewModel.setOutcomeTransactions(transactions)
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    android.util.Log.e("HomeFragment", "Outcome API Failed: ${response.code()}")
+                    android.util.Log.e("HomeFragment", "Error Body: $errorBody")
+                    
+                    // Handle 404 case
+                    if (response.code() == 404) {
+                        viewModel.setOutcomeTransactions(emptyList())
+                    }
                 }
             }
-        }
 
-        override fun onFailure(call: Call<TransactionsResponse>, t: Throwable) {
-            android.util.Log.e("HomeFragment", "Outcome API call failed: ${t.message}")
-            viewModel.setOutcomeTransactions(emptyList())
-        }
-    })
-}
+            override fun onFailure(call: Call<TransactionsResponse>, t: Throwable) {
+                android.util.Log.e("HomeFragment", "Outcome API call failed: ${t.message}")
+                viewModel.setOutcomeTransactions(emptyList())
+            }
+        })
+    }
     
     override fun onResume() {
         super.onResume()
-        loadAllTransactions() // Memastikan data diload ulang saat fragment di-resume
+        loadAllTransactions()
+        loadTopGoals()
     }
 
     private fun updateBalanceDisplay(balance: Double) {
@@ -409,5 +436,62 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.initializeFromSharedPreferences(requireContext())
+    }
+
+
+
+    private fun getToken(): String? {
+        return context?.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            ?.getString("auth_token", null)
+    }
+
+    private fun setupRecyclerView() {
+        goalsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            goalAdapter = GoalAdapter(emptyList())
+            adapter = goalAdapter
+        }
+        
+        // Load goals setelah setup RecyclerView
+        loadTopGoals()
+    }
+
+    private fun loadTopGoals() {
+        val token = getToken()
+        if (token != null) {
+            goalApi.getGoals("Bearer $token").enqueue(object : Callback<GoalsResponse> {
+                override fun onResponse(call: Call<GoalsResponse>, response: Response<GoalsResponse>) {
+                    if (response.isSuccessful) {
+                        val allGoals = response.body()?.goals ?: emptyList()
+                        // Ambil 2 goals teratas
+                        val topGoals = allGoals.take(2)
+                        
+                        activity?.runOnUiThread {
+                            if (topGoals.isNotEmpty()) {
+                                goalAdapter.updateGoals(topGoals)
+                                goalsRecyclerView.visibility = View.VISIBLE
+                            } else {
+                                goalsRecyclerView.visibility = View.GONE
+                            }
+                        }
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+                        android.util.Log.e("HomeFragment", "Error loading goals: ${response.code()}")
+                        android.util.Log.e("HomeFragment", "Error Body: $errorBody")
+                    }
+                }
+
+                override fun onFailure(call: Call<GoalsResponse>, t: Throwable) {
+                    android.util.Log.e("HomeFragment", "Failed to load goals: ${t.message}")
+                    activity?.runOnUiThread {
+                        Toast.makeText(
+                            context,
+                            "Gagal memuat goals: ${t.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            })
+        }
     }
 }
