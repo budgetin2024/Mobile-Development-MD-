@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.budgee.MainActivity
 import com.example.budgee.R
 import com.example.budgee.adapter.NewsAdapter
-import com.example.budgee.json.Articles
+import com.example.budgee.json.Article
 import com.example.budgee.json.NewsResponse
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,58 +24,33 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import retrofit2.http.Header
-import okhttp3.Interceptor
+import retrofit2.http.Query
 
 class NewsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var noArticlesTextView: TextView
-    private var articles = mutableListOf<Articles>()
+    private var articles = mutableListOf<Article>()
 
-    private val BASE_URL = "https://backend-budgetin.et.r.appspot.com/"
-
-    // Buat interface untuk API
     private interface NewsApiService {
-        @GET("news")
-        fun getNews(): Call<NewsResponse>
+        @GET("top-headlines")
+        fun getNews(
+            @Query("country") country: String,
+            @Query("category") category: String,
+            @Query("apiKey") apiKey: String
+        ): Call<NewsResponse>
     }
 
     private fun setupRetrofit(): NewsApiService {
-        val token = getToken()
-        if (token == null) {
-            Toast.makeText(context, "Token tidak ditemukan", Toast.LENGTH_SHORT).show()
-            throw IllegalStateException("Token tidak ditemukan")
-        }
-
-        // Debug log
-        Log.d("NewsFragment", "Setting up Retrofit with token: ${token.take(20)}...")
-
-        // Buat interceptor untuk autentikasi
-        val authInterceptor = Interceptor { chain ->
-            val originalRequest = chain.request()
-            val requestBuilder = originalRequest.newBuilder()
-                .header("Authorization", "Bearer $token")
-            
-            val request = requestBuilder.build()
-            Log.d("NewsFragment", "Request URL: ${request.url}")
-            Log.d("NewsFragment", "Request Headers: ${request.headers}")
-            
-            chain.proceed(request)
-        }
-
-        // Setup OkHttpClient dengan interceptor
         val client = OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
             .build()
 
-        // Buat Retrofit instance
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl("https://newsapi.org/v2/") // URL NewsAPI
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -83,37 +58,53 @@ class NewsFragment : Fragment() {
     }
 
     private fun fetchNews() {
-        try {
-            val newsApi = setupRetrofit()
-            
-            newsApi.getNews().enqueue(object : Callback<NewsResponse> {
+        val newsApi = setupRetrofit()
+        newsApi.getNews("us", "business", "d785abb609e845ffa5828f81a90faf18")
+            .enqueue(object : Callback<NewsResponse> {
                 override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
                     if (!isAdded) return
-
-                    Log.d("NewsFragment", "Response Code: ${response.code()}")
-                    Log.d("NewsFragment", "Response Headers: ${response.headers()}")
-
-                    activity?.runOnUiThread {
-                        when (response.code()) {
-                            200 -> handleSuccessResponse(response.body())
-                            401, 403 -> handleAuthError()
-                            500 -> handleServerError(response.errorBody()?.string())
-                            else -> handleOtherError(response)
+                    if (response.isSuccessful) {
+                        val newsResponse = response.body()
+                        newsResponse?.articles?.let {
+                            articles.clear()
+                            articles.addAll(it)
+                            newsAdapter.notifyDataSetChanged()
                         }
+                    } else {
+                        handleOtherError(response)
                     }
                 }
 
                 override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                    if (!isAdded) return
                     handleNetworkError(t)
                 }
             })
-        } catch (e: Exception) {
-            Log.e("NewsFragment", "Error setting up network call: ${e.message}")
-            handleSetupError(e)
+    }
+
+    // Menangani error jaringan
+    private fun handleNetworkError(t: Throwable) {
+        Log.e("NewsFragment", "Network error: ${t.message}")
+        activity?.runOnUiThread {
+            Toast.makeText(context, "Gagal terhubung ke server", Toast.LENGTH_SHORT).show()
+            recyclerView.visibility = View.GONE
+            noArticlesTextView.visibility = View.VISIBLE
+            noArticlesTextView.text = "Gagal memuat berita: Tidak ada koneksi"
         }
     }
 
+    // Menangani error yang terkait dengan respons API lainnya
+    private fun handleOtherError(response: Response<NewsResponse>) {
+        val errorBody = response.errorBody()?.string()
+        Log.e("NewsFragment", "Error: ${response.code()} - $errorBody")
+        activity?.runOnUiThread {
+            Toast.makeText(context, "Gagal memuat berita: ${response.code()}", Toast.LENGTH_SHORT).show()
+            recyclerView.visibility = View.GONE
+            noArticlesTextView.visibility = View.VISIBLE
+            noArticlesTextView.text = "Gagal memuat berita"
+        }
+    }
+
+    // Menangani UI ketika data berita berhasil diterima
     private fun handleSuccessResponse(newsResponse: NewsResponse?) {
         activity?.runOnUiThread {
             if (newsResponse?.articles?.isNotEmpty() == true) {
@@ -130,6 +121,7 @@ class NewsFragment : Fragment() {
         }
     }
 
+    // Menangani autentikasi error
     private fun handleAuthError() {
         activity?.runOnUiThread {
             Toast.makeText(context, "Sesi telah berakhir. Silakan login kembali.", Toast.LENGTH_SHORT).show()
@@ -139,6 +131,7 @@ class NewsFragment : Fragment() {
         }
     }
 
+    // Menangani error server
     private fun handleServerError(errorBody: String?) {
         Log.e("NewsFragment", "Server Error: $errorBody")
         activity?.runOnUiThread {
@@ -146,36 +139,6 @@ class NewsFragment : Fragment() {
             recyclerView.visibility = View.GONE
             noArticlesTextView.visibility = View.VISIBLE
             noArticlesTextView.text = "Gagal memuat berita: Server Error"
-        }
-    }
-
-    private fun handleOtherError(response: Response<NewsResponse>) {
-        val errorBody = response.errorBody()?.string()
-        Log.e("NewsFragment", "Error: ${response.code()} - $errorBody")
-        activity?.runOnUiThread {
-            Toast.makeText(context, "Gagal memuat berita: ${response.code()}", Toast.LENGTH_SHORT).show()
-            recyclerView.visibility = View.GONE
-            noArticlesTextView.visibility = View.VISIBLE
-            noArticlesTextView.text = "Gagal memuat berita"
-        }
-    }
-
-    private fun handleNetworkError(t: Throwable) {
-        Log.e("NewsFragment", "Network error: ${t.message}")
-        activity?.runOnUiThread {
-            Toast.makeText(context, "Gagal terhubung ke server", Toast.LENGTH_SHORT).show()
-            recyclerView.visibility = View.GONE
-            noArticlesTextView.visibility = View.VISIBLE
-            noArticlesTextView.text = "Gagal memuat berita: Tidak ada koneksi"
-        }
-    }
-
-    private fun handleSetupError(e: Exception) {
-        activity?.runOnUiThread {
-            Toast.makeText(context, "Gagal mempersiapkan koneksi: ${e.message}", Toast.LENGTH_SHORT).show()
-            recyclerView.visibility = View.GONE
-            noArticlesTextView.visibility = View.VISIBLE
-            noArticlesTextView.text = "Gagal memuat berita: Error setup"
         }
     }
 
@@ -197,13 +160,6 @@ class NewsFragment : Fragment() {
         fetchNews()
 
         return view
-    }
-
-    private fun getToken(): String? {
-        val sharedPreferences = requireActivity().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("auth_token", null)
-        Log.d("NewsFragment", "Raw token from SharedPreferences: $token")
-        return token
     }
 
     override fun onResume() {
